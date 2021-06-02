@@ -1,0 +1,10 @@
+.idea/
+/coverage/
+/vendor/
+/logs/*
+!/logs/README.md
+/var/cache/*
+
+#Slim .gitignore
+.env
+public/tests

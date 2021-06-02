@@ -1,0 +1,55 @@
+#
+# Here is a sample command to run composer install/update 
+# docker run --rm --interactive --tty --volume ${PWD}:/app  --volume ${COMPOSER_HOME}:/tmp --user ${(id -u)}:${(id -g)} composer install --ignore-platform-reqs --no-scripts
+#
+# Tell docker what version of the docker-compose.yml we're using
+version: '3.1'
+
+# Start the services section    
+services:     
+  # Define the name of our service, corresponds to the "--name" parameter of docker command. 
+  php-fpm:
+    container_name: krushinaturals-api-php-fpm
+    build:
+      # define the directory where the build should happened,
+      # i.e. where the Dockerfile of the service is located
+      # all paths are relative to the location of docker-compose.yml
+      context: ./docker/php-fpm
+      args:
+        - WITH_XDEBUG=true
+    # mount the app directory of the host to /var/www in the container
+    # corresponds to the "-v" option       
+    volumes:
+      - .:/var/www
+  nginx-web:
+    container_name: krushinaturals-api-webserver
+    build:
+      context: ./docker/nginx-web
+    volumes:
+      - .:/var/www   
+      - ./docker/nginx-web/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx-web/sites/:/etc/nginx/sites-available
+      - ./docker/nginx-web/conf.d/:/etc/nginx/conf.d
+    depends_on:
+      - php-fpm
+    # defines the port mapping, corresponds to the "-p" flag  
+    ports:
+      - "80:80"
+      - "443:443"
+  # postgres-db:
+  #   container_name: krushinaturals-api-postgres
+  #   restart: 'always'
+  #   ports:
+  #     - '5432:5432'
+  #   environment:
+  #     - POSTGRES_PASSWORD=123   
+  #     - POSTGRES_USER0=AstuteDba   
+  #     - POSTGRES_USER1=astutedba                  
+  #     - POSTGRES_USER2=astuterdev               
+  #     - POSTGRES_USER3=astuter
+  #     - POSTGRES_PASSWORD0=123
+  #     - POSTGRES_DB0=krushi  
+  #   build:
+  #     context: ./postgres
+  #   volumes:      
+  #     - ../../dbchanges/krushi/init_db:/tmp/init_db 
